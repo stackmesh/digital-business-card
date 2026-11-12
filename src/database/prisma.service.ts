@@ -13,8 +13,8 @@ export class PrismaService extends PrismaClient implements OnModuleDestroy {
     super({ adapter });
   }
 
-  // No domain models exist yet, so bootstrap does not open a connection.
-  // Prisma Client connects on the first query.
+  // Prisma 7 connects on the first query. Migrations are applied with
+  // `prisma migrate deploy`, so process startup does not require PostgreSQL.
   async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
   }

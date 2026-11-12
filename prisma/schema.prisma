@@ -6,3 +6,99 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+/// The single business card. `singletonKey` is a fixed domain key so the
+/// application never depends on the generated primary key. The initial
+/// migration also checks that the key stays `canonical`.
+model Profile {
+  id           String @id @default(uuid()) @db.Uuid
+  singletonKey String @unique @default("canonical") @map("singleton_key") @db.VarChar(32)
+  name         String @db.VarChar(200)
+  description  String @db.Text
+
+  professionalLinks ProfessionalLink[]
+  skills            Skill[]
+  experiences       Experience[]
+  projects          Project[]
+
+  @@map("profile")
+}
+
+model ProfessionalLink {
+  id        String @id @default(uuid()) @db.Uuid
+  profileId String @map("profile_id") @db.Uuid
+  label     String @db.VarChar(100)
+  url       String @db.VarChar(2048)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([profileId, label])
+  @@unique([profileId, url])
+  @@map("professional_links")
+}
+
+model Skill {
+  id        String @id @default(uuid()) @db.Uuid
+  name      String @db.VarChar(100)
+  category  String @db.VarChar(100)
+  /// Ascending presentation order within the profile. Unique so ties cannot occur.
+  sortOrder Int    @map("sort_order")
+  profileId String @map("profile_id") @db.Uuid
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([profileId, name])
+  @@unique([profileId, sortOrder])
+  @@map("skills")
+}
+
+model Experience {
+  id          String    @id @default(uuid()) @db.Uuid
+  company     String    @db.VarChar(200)
+  position    String    @db.VarChar(200)
+  startDate   DateTime  @map("start_date") @db.Date
+  /// Null while the role is current. The migration rejects an end date before the start date.
+  endDate     DateTime? @map("end_date") @db.Date
+  description String    @db.Text
+  /// Ascending presentation order within the profile. Unique so ties cannot occur.
+  sortOrder   Int       @map("sort_order")
+  profileId   String    @map("profile_id") @db.Uuid
+
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  achievements Achievement[]
+
+  @@unique([profileId, sortOrder])
+  @@unique([profileId, company, position, startDate])
+  @@map("experiences")
+}
+
+model Achievement {
+  id           String @id @default(uuid()) @db.Uuid
+  description  String @db.Text
+  experienceId String @map("experience_id") @db.Uuid
+  /// Ascending presentation order within the experience. Unique so ties cannot occur.
+  sortOrder    Int    @map("sort_order")
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([experienceId, sortOrder])
+  @@map("achievements")
+}
+
+model Project {
+  id            String  @id @default(uuid()) @db.Uuid
+  name          String  @db.VarChar(200)
+  description   String  @db.Text
+  url           String  @db.VarChar(2048)
+  repositoryUrl String? @map("repository_url") @db.VarChar(2048)
+  /// Ascending presentation order within the profile. Unique so ties cannot occur.
+  sortOrder     Int     @map("sort_order")
+  profileId     String  @map("profile_id") @db.Uuid
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([profileId, name])
+  @@unique([profileId, sortOrder])
+  @@unique([profileId, url])
+  @@map("projects")
+}
