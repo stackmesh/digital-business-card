@@ -8,7 +8,8 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   const config = app.get(ConfigService<EnvironmentVariables, true>);
-  await app.listen(config.getOrThrow('PORT', { infer: true }));
+  // Bind all interfaces so the process is reachable through Docker port mapping.
+  await app.listen(config.getOrThrow('PORT', { infer: true }), '0.0.0.0');
 }
 
 await bootstrap();
