@@ -21,7 +21,12 @@ import { DateScalar } from './date.scalar.js';
           'production';
 
         return {
-          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+          // Development writes the committed schema. Production keeps it in
+          // memory: the runtime image has no src/, and a failed write there
+          // would stop the process before it listens.
+          autoSchemaFile: isProduction
+            ? true
+            : join(process.cwd(), 'src/schema.gql'),
           sortSchema: true,
           graphiql: false,
           introspection: !isProduction,

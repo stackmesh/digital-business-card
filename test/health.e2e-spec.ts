@@ -7,7 +7,7 @@ import { AppModule } from '../src/app.module.js';
 process.env.NODE_ENV = 'test';
 process.env.PORT = '3000';
 process.env.DATABASE_URL =
-  'postgresql://business_card:business_card@127.0.0.1:5432/business_card?schema=public';
+  'postgresql://unused:unused@127.0.0.1:1/business_card_test?schema=public';
 
 describe('Health (e2e)', () => {
   let app: INestApplication<App>;

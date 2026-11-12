@@ -34,7 +34,7 @@ NestJS feature modules keep each part of the card in its own boundary.
 
 Feature modules fit this API because the card is a few related collections with different query entry points, not one controller. A module can change its mapping or ordering without the others taking a dependency on Prisma.
 
-GraphQL is code-first. TypeScript classes in the feature modules are the source of the schema written to `src/schema.gql`. Nullable fields are declared where the data can be absent: `profile`, `Experience.endDate`, and `Project.repositoryUrl`. Lists contain non-null items.
+GraphQL is code-first. TypeScript classes in the feature modules are the source of the schema. Development and test write it to `src/schema.gql`. Production keeps the schema in memory, so the runtime image does not need a writable `src/` directory. Nullable fields are declared where the data can be absent: `profile`, `Experience.endDate`, and `Project.repositoryUrl`. Lists contain non-null items.
 
 PostgreSQL holds the card because the data is relational: one profile, cascading children, unique display order, and a check that an end date is not before the start date. Prisma applies the committed SQL migration and gives the services a typed client. The schema does not store the database URL. `prisma.config.ts` reads `DATABASE_URL`.
 
