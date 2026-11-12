@@ -8,16 +8,16 @@ This repository is a backend assignment. The committed seed is an explicit place
 
 Versions below are the ones installed from the lockfile.
 
-| Piece | Version |
-| --- | --- |
-| Node.js | 22 (`engines`: `>=22.22.3`; image `node:22-bookworm-slim`) |
-| TypeScript | 6.0.3 |
-| NestJS | 12.4.2 |
-| Apollo Server | 5.5.1 |
-| GraphQL | 16.15.0 |
-| Prisma and `@prisma/client` | 7.10.1 |
-| PostgreSQL | 17 (`postgres:17-alpine`) |
-| Jest / ts-jest | 30.5.2 / 29.4.15 |
+| Piece                       | Version                                                    |
+| --------------------------- | ---------------------------------------------------------- |
+| Node.js                     | 22 (`engines`: `>=22.22.3`; image `node:22-bookworm-slim`) |
+| TypeScript                  | 6.0.3                                                      |
+| NestJS                      | 12.4.2                                                     |
+| Apollo Server               | 5.5.1                                                      |
+| GraphQL                     | 16.15.0                                                    |
+| Prisma and `@prisma/client` | 7.10.1                                                     |
+| PostgreSQL                  | 17 (`postgres:17-alpine`)                                  |
+| Jest / ts-jest              | 30.5.2 / 29.4.15                                           |
 
 The Prisma 7 client is generated into `src/generated/prisma` and talks to PostgreSQL through `@prisma/adapter-pg`. `npm run build` runs `prisma generate` before `nest build`.
 
@@ -78,14 +78,14 @@ profile
   └── projects
 ```
 
-| Model | Stored fields used by the API |
-| --- | --- |
-| Profile | `name`, `description` |
-| ProfessionalLink | `label`, `url`. Unique per profile. Ordered by label, then URL. |
-| Skill | `name`, `category`, `sortOrder`. Both name and `sortOrder` are unique per profile. |
-| Experience | `company`, `position`, `startDate`, `endDate`, `description`, `sortOrder`. `endDate` is null for a current role. |
-| Achievement | `description`, `sortOrder`, belonging to one experience. |
-| Project | `name`, `description`, `url`, `repositoryUrl`, `sortOrder`. `repositoryUrl` is optional. |
+| Model            | Stored fields used by the API                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Profile          | `name`, `description`                                                                                            |
+| ProfessionalLink | `label`, `url`. Unique per profile. Ordered by label, then URL.                                                  |
+| Skill            | `name`, `category`, `sortOrder`. Both name and `sortOrder` are unique per profile.                               |
+| Experience       | `company`, `position`, `startDate`, `endDate`, `description`, `sortOrder`. `endDate` is null for a current role. |
+| Achievement      | `description`, `sortOrder`, belonging to one experience.                                                         |
+| Project          | `name`, `description`, `url`, `repositoryUrl`, `sortOrder`. `repositoryUrl` is optional.                         |
 
 `sortOrder` is ascending display order for skills, experience, achievements, and projects. The GraphQL API does not expose ids or `sortOrder`. Dates are PostgreSQL `DATE` values. The GraphQL `Date` scalar is `YYYY-MM-DD`.
 
@@ -93,19 +93,19 @@ profile
 
 `POST /graphql` with `Content-Type: application/json`.
 
-| Query | Result |
-| --- | --- |
-| `profile` | The canonical card, or `null` when it has not been created. |
-| `skills` | Skills ordered for display. |
-| `experience` | Roles ordered for display, including achievements. |
-| `projects` | Projects ordered for display. |
-| `health` | `{ status: "ok" }` when the process is running. |
+| Query        | Result                                                      |
+| ------------ | ----------------------------------------------------------- |
+| `profile`    | The canonical card, or `null` when it has not been created. |
+| `skills`     | Skills ordered for display.                                 |
+| `experience` | Roles ordered for display, including achievements.          |
+| `projects`   | Projects ordered for display.                               |
+| `health`     | `{ status: "ok" }` when the process is running.             |
 
 `GET /health` returns the same liveness payload. It does not check PostgreSQL.
 
 `Experience.description` and `Project.description` / `repositoryUrl` are queryable in addition to the fields in the assignment query. There are no mutations.
 
-In `development` and `test`, Apollo Sandbox is embedded at `GET /graphql` and introspection is on. In `production`, both are off. A browser `GET /graphql` without Apollo's preflight headers returns a CSRF `400`. Send a JSON POST to run a query. Compose sets `NODE_ENV=production`, so a Compose deployment does not publish Sandbox. The API has no authentication; a public Sandbox would advertise and execute every query.
+Apollo Sandbox is embedded at `GET /graphql`, and introspection is on. Open that URL in a browser to run queries. A form-style POST without a JSON `content-type` still returns Apollo's CSRF `400`. Send a JSON POST when calling the API without Sandbox.
 
 ### Assignment query
 
@@ -116,16 +116,27 @@ query ProfileCard {
   profile {
     name
     description
-    links { label url }
-    skills { name category }
+    links {
+      label
+      url
+    }
+    skills {
+      name
+      category
+    }
     experience {
       company
       position
       startDate
       endDate
-      achievements { description }
+      achievements {
+        description
+      }
     }
-    projects { name url }
+    projects {
+      name
+      url
+    }
   }
 }
 ```
@@ -137,8 +148,14 @@ query ProfileCard {
       "name": "Example Person",
       "description": "Placeholder biography. Replace this text with the real profile description. This is not a biography of a real person.",
       "links": [
-        { "label": "Example repository", "url": "https://example.com/replace-me/repository" },
-        { "label": "Example site", "url": "https://example.com/replace-me/site" }
+        {
+          "label": "Example repository",
+          "url": "https://example.com/replace-me/repository"
+        },
+        {
+          "label": "Example site",
+          "url": "https://example.com/replace-me/site"
+        }
       ],
       "skills": [
         { "name": "Example skill", "category": "Example category" },
@@ -151,8 +168,12 @@ query ProfileCard {
           "startDate": "2000-01-01",
           "endDate": "2001-12-31",
           "achievements": [
-            { "description": "Placeholder achievement. Replace this with a real accomplishment." },
-            { "description": "Second placeholder achievement. Replace this with a real accomplishment." }
+            {
+              "description": "Placeholder achievement. Replace this with a real accomplishment."
+            },
+            {
+              "description": "Second placeholder achievement. Replace this with a real accomplishment."
+            }
           ]
         },
         {
@@ -161,13 +182,21 @@ query ProfileCard {
           "startDate": "2002-01-01",
           "endDate": null,
           "achievements": [
-            { "description": "Placeholder achievement for the current role. Replace this with a real accomplishment." }
+            {
+              "description": "Placeholder achievement for the current role. Replace this with a real accomplishment."
+            }
           ]
         }
       ],
       "projects": [
-        { "name": "Example project", "url": "https://example.com/replace-me/project" },
-        { "name": "Second example project", "url": "https://example.com/replace-me/project-two" }
+        {
+          "name": "Example project",
+          "url": "https://example.com/replace-me/project"
+        },
+        {
+          "name": "Second example project",
+          "url": "https://example.com/replace-me/project-two"
+        }
       ]
     }
   }
@@ -251,16 +280,16 @@ Other scripts: `npm run build`, `npm run lint`, `npm run lint:fix`, `npm run for
 
 Copy `.env.example` to `.env`. The process refuses to start when validation fails.
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NODE_ENV` | No | `development` (default), `test`, or `production`. Compose sets `production` for the API. |
-| `PORT` | No | Integer 1–65535. Default `3000`. The API container always uses `3000`. |
-| `DATABASE_URL` | Yes for the API and Prisma | `postgresql://` or `postgres://`. Host Prisma uses `localhost:5433`. The API container uses host `postgres` and port `5432`. |
-| `POSTGRES_USER` | Used by Compose | Default `business_card`. |
-| `POSTGRES_PASSWORD` | Used by Compose | Default `business_card`. |
-| `POSTGRES_DB` | Used by Compose | Default `business_card`. |
-| `SEED_DATA_PATH` | No | Overrides the seed file. |
-| `TEST_DATABASE_URL` | No | Integration tests only. The database name must end in `_test`. Default is `business_card_test` on `127.0.0.1:5434`. |
+| Variable            | Required                   | Purpose                                                                                                                      |
+| ------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`          | No                         | `development` (default), `test`, or `production`. Compose sets `production` for the API.                                     |
+| `PORT`              | No                         | Integer 1–65535. Default `3000`. The API container always uses `3000`.                                                       |
+| `DATABASE_URL`      | Yes for the API and Prisma | `postgresql://` or `postgres://`. Host Prisma uses `localhost:5433`. The API container uses host `postgres` and port `5432`. |
+| `POSTGRES_USER`     | Used by Compose            | Default `business_card`.                                                                                                     |
+| `POSTGRES_PASSWORD` | Used by Compose            | Default `business_card`.                                                                                                     |
+| `POSTGRES_DB`       | Used by Compose            | Default `business_card`.                                                                                                     |
+| `SEED_DATA_PATH`    | No                         | Overrides the seed file.                                                                                                     |
+| `TEST_DATABASE_URL` | No                         | Integration tests only. The database name must end in `_test`. Default is `business_card_test` on `127.0.0.1:5434`.          |
 
 ## Tests
 
@@ -306,7 +335,7 @@ Git repository: <https://github.com/stackmesh/digital-business-card>
 
 A read-only API is enough. The card is published content. Changes go through the seed file and a repeatable transaction, which keeps one source of truth and avoids a write API with no authorization model.
 
-Authentication is omitted. Anyone who can reach the server can read the card. That is acceptable for a public profile and is why production turns Sandbox and introspection off.
+Authentication is omitted. Anyone who can reach the server can read the card. That is acceptable for a public profile. Sandbox stays available so the GraphQL URL can be opened in a browser.
 
 S3 and other object storage are omitted. Projects and links store URLs. The API does not upload files.
 

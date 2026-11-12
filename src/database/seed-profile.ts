@@ -82,110 +82,113 @@ export async function seedCanonicalProfile(
 ): Promise<SeedResult> {
   const { profile } = document;
 
-  return prisma.$transaction(async (tx) => {
-    const existing = await tx.profile.findUnique({
-      where: { singletonKey: CANONICAL_PROFILE_KEY },
-      select: { id: true },
-    });
-
-    const saved = await tx.profile.upsert({
-      where: { singletonKey: CANONICAL_PROFILE_KEY },
-      create: {
-        singletonKey: CANONICAL_PROFILE_KEY,
-        name: profile.name,
-        description: profile.description,
-      },
-      update: {
-        name: profile.name,
-        description: profile.description,
-      },
-      select: { id: true },
-    });
-
-    const experiences = await tx.experience.findMany({
-      where: { profileId: saved.id },
-      select: { id: true },
-    });
-    await tx.achievement.deleteMany({
-      where: { experienceId: { in: experiences.map((item) => item.id) } },
-    });
-    await tx.experience.deleteMany({ where: { profileId: saved.id } });
-    await tx.professionalLink.deleteMany({ where: { profileId: saved.id } });
-    await tx.skill.deleteMany({ where: { profileId: saved.id } });
-    await tx.project.deleteMany({ where: { profileId: saved.id } });
-
-    if (profile.links.length > 0) {
-      await tx.professionalLink.createMany({
-        data: profile.links.map((link) => ({
-          profileId: saved.id,
-          label: link.label,
-          url: link.url,
-        })),
+  return prisma.$transaction(
+    async (tx) => {
+      const existing = await tx.profile.findUnique({
+        where: { singletonKey: CANONICAL_PROFILE_KEY },
+        select: { id: true },
       });
-    }
 
-    if (profile.skills.length > 0) {
-      await tx.skill.createMany({
-        data: profile.skills.map((skill, sortOrder) => ({
-          profileId: saved.id,
-          name: skill.name,
-          category: skill.category,
-          sortOrder,
-        })),
-      });
-    }
-
-    for (const [sortOrder, experience] of profile.experience.entries()) {
-      await tx.experience.create({
-        data: {
-          profileId: saved.id,
-          company: experience.company,
-          position: experience.position,
-          startDate: calendarDate(experience.startDate),
-          endDate:
-            experience.endDate === null
-              ? null
-              : calendarDate(experience.endDate),
-          description: experience.description,
-          sortOrder,
-          achievements: {
-            create: experience.achievements.map((achievement, index) => ({
-              description: achievement.description,
-              sortOrder: index,
-            })),
-          },
+      const saved = await tx.profile.upsert({
+        where: { singletonKey: CANONICAL_PROFILE_KEY },
+        create: {
+          singletonKey: CANONICAL_PROFILE_KEY,
+          name: profile.name,
+          description: profile.description,
         },
+        update: {
+          name: profile.name,
+          description: profile.description,
+        },
+        select: { id: true },
       });
-    }
 
-    if (profile.projects.length > 0) {
-      await tx.project.createMany({
-        data: profile.projects.map((project, sortOrder) => ({
-          profileId: saved.id,
-          name: project.name,
-          description: project.description,
-          url: project.url,
-          repositoryUrl: project.repositoryUrl,
-          sortOrder,
-        })),
+      const experiences = await tx.experience.findMany({
+        where: { profileId: saved.id },
+        select: { id: true },
       });
-    }
+      await tx.achievement.deleteMany({
+        where: { experienceId: { in: experiences.map((item) => item.id) } },
+      });
+      await tx.experience.deleteMany({ where: { profileId: saved.id } });
+      await tx.professionalLink.deleteMany({ where: { profileId: saved.id } });
+      await tx.skill.deleteMany({ where: { profileId: saved.id } });
+      await tx.project.deleteMany({ where: { profileId: saved.id } });
 
-    return {
-      profileId: saved.id,
-      replacedExistingProfile: existing !== null,
-      counts: {
-        links: profile.links.length,
-        skills: profile.skills.length,
-        experiences: profile.experience.length,
-        achievements: profile.experience.reduce(
-          (total, experience) => total + experience.achievements.length,
-          0,
-        ),
-        projects: profile.projects.length,
-      },
-    };
-  });
+      if (profile.links.length > 0) {
+        await tx.professionalLink.createMany({
+          data: profile.links.map((link) => ({
+            profileId: saved.id,
+            label: link.label,
+            url: link.url,
+          })),
+        });
+      }
+
+      if (profile.skills.length > 0) {
+        await tx.skill.createMany({
+          data: profile.skills.map((skill, sortOrder) => ({
+            profileId: saved.id,
+            name: skill.name,
+            category: skill.category,
+            sortOrder,
+          })),
+        });
+      }
+
+      for (const [sortOrder, experience] of profile.experience.entries()) {
+        await tx.experience.create({
+          data: {
+            profileId: saved.id,
+            company: experience.company,
+            position: experience.position,
+            startDate: calendarDate(experience.startDate),
+            endDate:
+              experience.endDate === null
+                ? null
+                : calendarDate(experience.endDate),
+            description: experience.description,
+            sortOrder,
+            achievements: {
+              create: experience.achievements.map((achievement, index) => ({
+                description: achievement.description,
+                sortOrder: index,
+              })),
+            },
+          },
+        });
+      }
+
+      if (profile.projects.length > 0) {
+        await tx.project.createMany({
+          data: profile.projects.map((project, sortOrder) => ({
+            profileId: saved.id,
+            name: project.name,
+            description: project.description,
+            url: project.url,
+            repositoryUrl: project.repositoryUrl,
+            sortOrder,
+          })),
+        });
+      }
+
+      return {
+        profileId: saved.id,
+        replacedExistingProfile: existing !== null,
+        counts: {
+          links: profile.links.length,
+          skills: profile.skills.length,
+          experiences: profile.experience.length,
+          achievements: profile.experience.reduce(
+            (total, experience) => total + experience.achievements.length,
+            0,
+          ),
+          projects: profile.projects.length,
+        },
+      };
+    },
+    { maxWait: 20_000, timeout: 30_000 },
+  );
 }
 
 export function selectSeedDataFile(input: {

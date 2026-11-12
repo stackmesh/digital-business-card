@@ -29,17 +29,15 @@ import { DateScalar } from './date.scalar.js';
             : join(process.cwd(), 'src/schema.gql'),
           sortSchema: true,
           graphiql: false,
-          introspection: !isProduction,
+          introspection: true,
           context: ({ req, res }: { req: Request; res: Response }) => ({
             req,
             res,
           }),
-          // A public Sandbox advertises the whole schema and can run every
-          // query. This API has no authentication, so production disables the
-          // landing page and introspection. Local development embeds Sandbox.
-          plugins: isProduction
-            ? []
-            : [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+          // A browser visit to /graphql sends a GET without Apollo's
+          // preflight headers. The embedded Sandbox answers that GET.
+          // Form-style POST requests stay blocked by Apollo's CSRF check.
+          plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
         };
       },
     }),
