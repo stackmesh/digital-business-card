@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { readFileSync } from 'node:fs';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -197,7 +198,7 @@ describe('seed command', () => {
     const filePath = join(directory, 'bad.json');
     writeFileSync(filePath, '{');
     const errors: unknown[][] = [];
-    const errorSpy = vi
+    const errorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation((...args: unknown[]) => {
         errors.push(args);
@@ -219,12 +220,12 @@ describe('seed command', () => {
 
   it('returns a nonzero code when DATABASE_URL is missing', async () => {
     const errors: unknown[][] = [];
-    const errorSpy = vi
+    const errorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation((...args: unknown[]) => {
         errors.push(args);
       });
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     try {
       const code = await runSeed({

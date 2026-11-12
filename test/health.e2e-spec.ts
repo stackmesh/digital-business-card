@@ -37,7 +37,7 @@ describe('Health (e2e)', () => {
       .get('/graphql')
       .set('Accept', 'text/html');
 
-    expect(sandbox.status, sandbox.text).toBe(200);
+    expect(sandbox.status).toBe(200);
     expect(sandbox.headers['content-type']).toContain('text/html');
     expect(sandbox.text.toLowerCase()).toContain('sandbox');
 

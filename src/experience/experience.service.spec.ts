@@ -1,10 +1,11 @@
+import { jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../database/prisma.service.js';
 import { ExperienceService } from './experience.service.js';
 
 describe('ExperienceService', () => {
   it('loads every role and its achievements in one findMany', async () => {
-    const findMany = vi.fn().mockResolvedValue([
+    const findMany = jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
       {
         company: 'Northwind',
         position: 'Engineer',

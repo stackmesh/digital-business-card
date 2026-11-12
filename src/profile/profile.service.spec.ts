@@ -1,10 +1,11 @@
+import { jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { CANONICAL_PROFILE_KEY } from '../database/canonical-profile.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { ProfileService } from './profile.service.js';
 
 describe('ProfileService', () => {
-  const findUnique = vi.fn();
+  const findUnique = jest.fn<(args: unknown) => Promise<unknown>>();
 
   beforeEach(() => {
     findUnique.mockReset();
@@ -90,7 +91,7 @@ describe('ProfileService', () => {
       ],
     });
 
-    const args = findUnique.mock.calls[0]?.[0] as {
+    const args = findUnique.mock.calls[0]?.[0] as unknown as {
       include: {
         professionalLinks: { orderBy: unknown };
         skills: { orderBy: unknown };
