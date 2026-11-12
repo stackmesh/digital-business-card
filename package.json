@@ -24,7 +24,8 @@
     "test:watch": "vitest",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "pretest:e2e": "prisma generate",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "seed": "npm run build && prisma db seed"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",

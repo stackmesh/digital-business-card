@@ -1,0 +1,71 @@
+{
+  "kind": "example-template",
+  "notice": "NOT A REAL PROFILE. Every name, date, description, and URL below is a placeholder. Replace this document with prisma/seed-data/profile.local.json or SEED_DATA_PATH, and set kind to supplied-profile. Array order is the display order.",
+  "profile": {
+    "name": "Example Person",
+    "description": "Placeholder biography. Replace this text with the real profile description. This is not a biography of a real person.",
+    "links": [
+      {
+        "label": "Example site",
+        "url": "https://example.com/replace-me/site"
+      },
+      {
+        "label": "Example repository",
+        "url": "https://example.com/replace-me/repository"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Example skill",
+        "category": "Example category"
+      },
+      {
+        "name": "Another example skill",
+        "category": "Example category"
+      }
+    ],
+    "experience": [
+      {
+        "company": "Example Company",
+        "position": "Example Role",
+        "startDate": "2000-01-01",
+        "endDate": "2001-12-31",
+        "description": "Placeholder role description. Replace this with real employment history.",
+        "achievements": [
+          {
+            "description": "Placeholder achievement. Replace this with a real accomplishment."
+          },
+          {
+            "description": "Second placeholder achievement. Replace this with a real accomplishment."
+          }
+        ]
+      },
+      {
+        "company": "Second Example Company",
+        "position": "Second Example Role",
+        "startDate": "2002-01-01",
+        "endDate": null,
+        "description": "Placeholder current role. Replace this with real employment history.",
+        "achievements": [
+          {
+            "description": "Placeholder achievement for the current role. Replace this with a real accomplishment."
+          }
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "Example project",
+        "description": "Placeholder project description. Replace this with a real project.",
+        "url": "https://example.com/replace-me/project",
+        "repositoryUrl": "https://example.com/replace-me/project.git"
+      },
+      {
+        "name": "Second example project",
+        "description": "Second placeholder project. Replace this with a real project.",
+        "url": "https://example.com/replace-me/project-two",
+        "repositoryUrl": null
+      }
+    ]
+  }
+}
