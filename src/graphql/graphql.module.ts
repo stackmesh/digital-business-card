@@ -1,31 +1,44 @@
+import { join } from 'node:path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { Module } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { EnvironmentVariables } from '../config/env.validation.js';
+import { DateScalar } from './date.scalar.js';
 
-export const GraphqlModule = GraphQLModule.forRootAsync<ApolloDriverConfig>({
-  driver: ApolloDriver,
-  inject: [ConfigService],
-  useFactory: (
-    configService: ConfigService<EnvironmentVariables, true>,
-  ): ApolloDriverConfig => {
-    const isProduction =
-      configService.getOrThrow('NODE_ENV', { infer: true }) === 'production';
+@Module({
+  imports: [
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<EnvironmentVariables, true>,
+      ): ApolloDriverConfig => {
+        const isProduction =
+          configService.getOrThrow('NODE_ENV', { infer: true }) ===
+          'production';
 
-    return {
-      autoSchemaFile: true,
-      sortSchema: true,
-      graphiql: false,
-      introspection: !isProduction,
-      context: ({ req, res }: { req: Request; res: Response }) => ({
-        req,
-        res,
-      }),
-      plugins: isProduction
-        ? []
-        : [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
-    };
-  },
-});
+        return {
+          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+          sortSchema: true,
+          graphiql: false,
+          introspection: !isProduction,
+          context: ({ req, res }: { req: Request; res: Response }) => ({
+            req,
+            res,
+          }),
+          // A public Sandbox advertises the whole schema and can run every
+          // query. This API has no authentication, so production disables the
+          // landing page and introspection. Local development embeds Sandbox.
+          plugins: isProduction
+            ? []
+            : [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+        };
+      },
+    }),
+  ],
+  providers: [DateScalar],
+})
+export class GraphqlModule {}

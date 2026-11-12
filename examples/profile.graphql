@@ -1,0 +1,27 @@
+query ProfileCard {
+  profile {
+    name
+    description
+    links {
+      label
+      url
+    }
+    skills {
+      name
+      category
+    }
+    experience {
+      company
+      position
+      startDate
+      endDate
+      achievements {
+        description
+      }
+    }
+    projects {
+      name
+      url
+    }
+  }
+}

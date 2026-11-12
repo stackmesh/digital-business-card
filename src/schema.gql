@@ -1,0 +1,69 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Achievement {
+  description: String!
+}
+
+"""
+Calendar date in YYYY-MM-DD form. Employment dates have no time component.
+"""
+scalar Date
+
+type Experience {
+  achievements: [Achievement!]!
+  company: String!
+  description: String!
+  endDate: Date
+  position: String!
+  startDate: Date!
+}
+
+"""Liveness of the API process."""
+type HealthReportModel {
+  status: String!
+}
+
+type ProfessionalLink {
+  label: String!
+  url: String!
+}
+
+type Profile {
+  description: String!
+  experience: [Experience!]!
+  links: [ProfessionalLink!]!
+  name: String!
+  projects: [Project!]!
+  skills: [Skill!]!
+}
+
+type Project {
+  description: String!
+  name: String!
+  repositoryUrl: String
+  url: String!
+}
+
+type Query {
+  """Work experience on the business card, ordered for display."""
+  experience: [Experience!]!
+
+  """Reports whether the API process is running."""
+  health: HealthReportModel!
+
+  """The canonical business card, or null when it has not been created."""
+  profile: Profile
+
+  """Projects on the business card, ordered for display."""
+  projects: [Project!]!
+
+  """Skills on the business card, ordered for display."""
+  skills: [Skill!]!
+}
+
+type Skill {
+  category: String!
+  name: String!
+}
